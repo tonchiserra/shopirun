@@ -1,0 +1,27 @@
+{
+	"name": "shopirun",
+	"version": "0.1.0",
+	"bin": {
+		"shopirun": "./bin/index.js"
+	},
+	"keywords": [
+		"shopify",
+		"cli",
+		"tool",
+		"shopirun",
+		"shopify-cli",
+		"shopify-tool",
+		"shopify-tools",
+		"shopify-app",
+		"shopify-apps",
+		"shopify-app-tool",
+		"shopify-app-tools"
+	],
+	"author": "tonchiserra",
+	"license": "ISC",
+	"dependencies": {
+		"@shopify/cli": "3.84.1",
+		"cross-spawn": "7.0.6",
+		"inquirer": "12.9.4"
+	}
+}
