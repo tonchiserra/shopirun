@@ -1,46 +1,49 @@
 #!/usr/bin/env node
 import inquirer from "inquirer"
 import { spawn } from "cross-spawn"
-
-const scripts = {
-    start: (store) => [
-        "npx",
-        ["shopify", "theme", "dev", `--store=${store}`, "--theme-editor-sync", "--path=."]
-    ],
-    deploy: () => [
-        "npx",
-        ["shopify", "theme", "push", "--ignore", "config/settings_data.json", "templates/*.json", "--path=."]
-    ],
-    "deploy-all": () => [
-        "npx",
-        ["shopify", "theme", "push", "--path=."]
-    ],
-    pull: () => [
-        "npx",
-        ["shopify", "theme", "pull", "--path=."]
-    ],
-    "pull-merch": () => [
-        "npx",
-        ["shopify", "theme", "pull", "--nodelete", "-o", "templates/*.json", "config/settings_data.json", "locales/*.json", "--path=."]
-    ]
-}
+import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
+import { capitalize, closeTerminal } from "../lib/utils.js"
 
 const run = async (command) => {
-    let store = ""
-    if (command === "start") {
+    const params = []
+
+    if (command === "start" || command === "deploy-new") {
         const res = await inquirer.prompt([
-            { type: "input", name: "store", message: "Ingrese la URL de la tienda:" }
+            { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
         ])
-        store = res.store
+        params.push(res.store)
     }
 
-    const [cmd, args] = scripts[command](store)
+    if (command === "deploy-new") {
+        const res = await inquirer.prompt([
+            { type: "input", name: "themeName", message: "Enter the new theme name:" }
+        ])
+        params.push(res.themeName)
+    }
+
+    if(!!!scripts[command]) {
+        console.error(`❌ Command not found: ${capitalize(command)}`)
+        closeTerminal(1)
+        return
+    }
+
+    console.log("")
+    console.log(`🚀 Running command: ${capitalize(command)}`)
+    console.log("")
+
+    const [cmd, args] = scripts[command](...params)
 
     const child = spawn(cmd, args, { stdio: "inherit", shell: true })
-    child.on("close", (code) => process.exit(code))
+    child.on("close", (code) => {
+        closeTerminal(code)
+    })
 }
 
 const init = async () => {
+    console.clear()
+    console.log("👋 Welcome to Shopirun!")
+    console.log("")
+
     // run command from arg if exists. E.g. `shopirun start`
     const argCommand = process.argv[2]
     if(argCommand && scripts[argCommand]) {
@@ -49,15 +52,48 @@ const init = async () => {
     }
 
     // run command from menu
-    const { command } = await inquirer.prompt([
-        {
-            type: "list",
-            name: "command",
-            message: "Selecciona un comando:",
-            choices: Object.keys(scripts).map(key => (key.charAt(0).toUpperCase() + key.slice(1)).replace("-", " "))
+    let command = ""
+    let showMenu = true
+    do {
+        let firstMenuRes = await inquirer.prompt([
+            {
+                type: "list",
+                name: "command",
+                message: "Select command:",
+                choices: [
+                    ...Object.keys(principalScripts).map(key => capitalize(key)),
+                    "Other",
+                    "Exit"
+                ]
+            }
+        ])
+
+        command = firstMenuRes.command.replace(" ", "-").toLowerCase()
+        showMenu = false
+
+        if(command === "other") {
+            let secondMenuRes = await inquirer.prompt([
+                {
+                    type: "list",
+                    name: "command",
+                    message: "Select command:",
+                    choices: [
+                        ...Object.keys(secondaryScripts).map(key => capitalize(key)),
+                        "Back",
+                        "Exit"
+                    ]
+                }
+            ])
+
+            command = secondMenuRes.command.replace(" ", "-").toLowerCase()
+            if(command === "back") showMenu = true
         }
-    ])
-    await run(command.toLowerCase().replace(" ", "-"))
+
+    } while(showMenu)
+
+    if(command === "exit") closeTerminal(0)
+
+    await run(command)
 }
 
 init()
