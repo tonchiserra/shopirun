@@ -10,18 +10,10 @@ A simple CLI tool to streamline Shopify theme development and deployment workflo
 
 ## Installation
 
-Clone the repository and install dependencies:
+Install globally via npm:
 
 ```bash
-git clone <your-repo-url>
-cd shopirun
-npm install
-```
-
-Make the CLI globally available (optional):
-
-```bash
-npm link
+npm install -g shopirun
 ```
 
 ## Usage
