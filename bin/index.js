@@ -2,23 +2,37 @@
 import inquirer from "inquirer"
 import { spawn } from "cross-spawn"
 import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
-import { capitalize, closeTerminal } from "../lib/utils.js"
+import { capitalize, closeTerminal, getThemeFlag, log } from "../lib/utils.js"
+import { config } from "../lib/config.js"
 
 const run = async (command) => {
     const params = []
 
-    if (command === "start" || command === "deploy-new") {
-        const res = await inquirer.prompt([
-            { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
-        ])
-        params.push(res.store)
+    if(command === "start" || command === "deploy-new") {
+        let store = ''
+        if(!!config.store) store = config.store
+        else {
+            let res = await inquirer.prompt([
+                { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
+            ])
+            store = res.store
+        }
+
+        params.push(`--store=${store.replace('.myshopify.com', '')}.myshopify.com`)
+        log(`🛍️ Running on store: ${store}`)
     }
 
-    if (command === "deploy-new") {
-        const res = await inquirer.prompt([
+    if(command === "start") {
+        let themeFlag = await getThemeFlag()
+        params.push(themeFlag)
+    }
+
+    if(command === "deploy-new") {
+        let res = await inquirer.prompt([
             { type: "input", name: "themeName", message: "Enter the new theme name:" }
         ])
-        params.push(res.themeName)
+        params.push(`--theme="${res.themeName}"`)
+        log(`🎨 Creating new theme: ${res.themeName}`)
     }
 
     if(!!!scripts[command]) {
@@ -27,9 +41,7 @@ const run = async (command) => {
         return
     }
 
-    console.log("")
-    console.log(`🚀 Running command: ${capitalize(command)}`)
-    console.log("")
+    log(`🚀 Running command: ${capitalize(command)}`)
 
     const [cmd, args] = scripts[command](...params)
 
@@ -41,8 +53,7 @@ const run = async (command) => {
 
 const init = async () => {
     console.clear()
-    console.log("👋 Welcome to Shopirun!")
-    console.log("")
+    log("👋 Welcome to Shopirun!")
 
     // run command from arg if exists. E.g. `shopirun start`
     const argCommand = process.argv[2]
