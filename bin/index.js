@@ -53,7 +53,13 @@ const run = async (command) => {
 
 const init = async () => {
     console.clear()
-    log("👋 Welcome to Shopirun!")
+    const { readFileSync } = await import('fs')
+    const { resolve, dirname } = await import('path')
+    const { fileURLToPath } = await import('url')
+    
+    const __dirname = dirname(fileURLToPath(import.meta.url))
+    const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'))
+    log(`👋 Welcome to Shopirun! v${packageJson.version}`)
 
     // run command from arg if exists. E.g. `shopirun start`
     const argCommand = process.argv[2]
