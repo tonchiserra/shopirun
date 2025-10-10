@@ -2,29 +2,33 @@
 import inquirer from "inquirer"
 import { spawn } from "cross-spawn"
 import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
-import { capitalize, closeTerminal, getThemeFlag, log } from "../lib/utils.js"
+import { capitalize, closeTerminal, getThemeFlag, log, getVersion } from "../lib/utils.js"
 import { config } from "../lib/config.js"
 
 const run = async (command) => {
     const params = []
-
-    if(command === "start" || command === "deploy-new") {
-        let store = ''
-        if(!!config.store) store = config.store
-        else {
-            let res = await inquirer.prompt([
-                { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
-            ])
-            store = res.store
-        }
-
-        params.push(`--store=${store.replace('.myshopify.com', '')}.myshopify.com`)
-        log(`🛍️ Running on store: ${store}`)
+    
+    let store = ''
+    if(!!config.store) store = config.store
+    else {
+        let res = await inquirer.prompt([
+            { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
+        ])
+        store = res.store
     }
+
+    params.push(`--store=${store.replace('.myshopify.com', '')}.myshopify.com`)
+    log(`🛍️  Running on store: ${store}`)
 
     if(command === "start") {
         let themeFlag = await getThemeFlag()
         params.push(themeFlag)
+    }
+
+    if(command === "make-backup-and-deploy-all") {
+        let themeFlag = await getThemeFlag()
+        params.push(themeFlag)
+        log(`💾 Making a backup of the selected theme before deploying...`)
     }
 
     if(command === "deploy-new") {
@@ -53,13 +57,9 @@ const run = async (command) => {
 
 const init = async () => {
     console.clear()
-    const { readFileSync } = await import('fs')
-    const { resolve, dirname } = await import('path')
-    const { fileURLToPath } = await import('url')
-    
-    const __dirname = dirname(fileURLToPath(import.meta.url))
-    const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'))
-    log(`👋 Welcome to Shopirun! v${packageJson.version}`)
+
+    const v = await getVersion()
+    log(`👋 Welcome to Shopirun! v${v}`)
 
     // run command from arg if exists. E.g. `shopirun start`
     const argCommand = process.argv[2]
@@ -85,7 +85,7 @@ const init = async () => {
             }
         ])
 
-        command = firstMenuRes.command.replace(" ", "-").toLowerCase()
+        command = firstMenuRes.command.replaceAll(" ", "-").toLowerCase()
         showMenu = false
 
         if(command === "other") {
@@ -102,7 +102,7 @@ const init = async () => {
                 }
             ])
 
-            command = secondMenuRes.command.replace(" ", "-").toLowerCase()
+            command = secondMenuRes.command.replaceAll(" ", "-").toLowerCase()
             if(command === "back") showMenu = true
         }
 
