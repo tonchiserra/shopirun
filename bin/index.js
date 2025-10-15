@@ -25,7 +25,7 @@ const run = async (command) => {
         params.push(themeFlag)
     }
 
-    if(command === "make-backup-and-deploy-all") {
+    if(command.includes('make-backup-and-deploy')) {
         let themeFlag = await getThemeFlag()
         params.push(themeFlag)
         log(`💾 Making a backup of the selected theme before deploying...`)
