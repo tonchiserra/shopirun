@@ -4,10 +4,36 @@ import { spawn } from "cross-spawn"
 import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
 import { capitalize, closeTerminal, getThemeFlag, log, getVersion } from "../lib/utils.js"
 import { config } from "../lib/config.js"
+import { syncSkills } from "../lib/handlers/syncSkills.js"
+import { syncCommands } from "../lib/handlers/syncCommands.js"
+
+// Handle Ctrl+C gracefully
+process.on('SIGINT', () => {
+    console.log('\n\n👋 Goodbye!\n')
+    process.exit(0)
+})
+
+// Custom handlers for non-Shopify CLI commands
+const customHandlers = {
+    "sync-skills": syncSkills,
+    "sync-commands": syncCommands
+}
 
 const run = async (command) => {
+    // Check if this is a custom command with its own handler
+    if (customHandlers[command]) {
+        try {
+            await customHandlers[command]()
+            closeTerminal(0)
+        } catch (error) {
+            console.error(`\n❌ Error: ${error.message}\n`)
+            closeTerminal(1)
+        }
+        return
+    }
+
     const params = []
-    
+
     let store = ''
     if(!!config.store) store = config.store
     else {
@@ -63,7 +89,7 @@ const init = async () => {
 
     // run command from arg if exists. E.g. `shopirun start`
     const argCommand = process.argv[2]
-    if(argCommand && scripts[argCommand]) {
+    if(argCommand && (argCommand in scripts || customHandlers[argCommand])) {
         await run(argCommand)
         return
     }
@@ -113,4 +139,12 @@ const init = async () => {
     await run(command)
 }
 
-init()
+init().catch((error) => {
+    // Handle ExitPromptError when user presses Ctrl+C during prompts
+    if (error.name === 'ExitPromptError') {
+        console.log('\n\n👋 Goodbye!\n')
+        process.exit(0)
+    }
+    console.error(`\n❌ Error: ${error.message}\n`)
+    process.exit(1)
+})

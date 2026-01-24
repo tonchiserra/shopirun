@@ -11,6 +11,7 @@ A simple CLI tool to streamline Shopify theme development and deployment workflo
 - 🎨 **Theme Management** – Create new unpublished themes and manage multiple theme environments
 - 💾 **Automatic Backups** – Create timestamped backups before major deployments
 - 📋 **Direct Command Execution** – Run commands directly from terminal or through interactive menu
+- 🤖 **Claude Code Integration** – Sync skills and commands from a shared GitHub repository
 
 ## Installation
 
@@ -48,6 +49,22 @@ Commands with `make-backup-and-` prefix automatically create a timestamped backu
 - **`deploy-all`** – Deploy all theme files to the selected theme
 - **`make-backup-and-deploy-without-jsons`** – Create backup and deploy excluding JSON files
 - **`deploy-without-jsons`** – Deploy theme files excluding JSON configuration files
+- **`sync-skills`** – Sync Claude Code skills from a shared GitHub repository
+- **`sync-commands`** – Sync Claude Code commands from a shared GitHub repository
+
+### Claude Code Sync Commands
+Sync skills and commands for Claude Code from a shared GitHub repository. Perfect for teams that want to keep their Claude Code tools synchronized.
+
+```bash
+shopirun sync-skills    # Sync skills to ~/.claude/skills/ or ./.claude/skills/
+shopirun sync-commands  # Sync commands to ~/.claude/commands/ or ./.claude/commands/
+```
+
+When running these commands, you'll be prompted to choose:
+- **Global** – Syncs to `~/.claude/skills/` or `~/.claude/commands/`
+- **Local** – Syncs to `./.claude/skills/` or `./.claude/commands/` in current directory
+
+The sync is smart: it adds new files, updates existing ones, but never deletes local files that aren't in the repository.
 
 ### Secondary Commands (via "Other" menu)
 - **`pull-locales`** – Pull only translation/locale files
@@ -76,6 +93,10 @@ Create a `shopirun.config.json` file in your project root to streamline your wor
 ### Configuration Options
 - **`store`** (string): Your Shopify store URL (automatically formats to .myshopify.com)
 - **`themes`** (object, optional): Map custom theme names to their IDs for quick selection
+- **`skillsRepoUrl`** (string, optional): Custom GitHub repository URL for Claude Code skills
+- **`commandsRepoUrl`** (string, optional): Custom GitHub repository URL for Claude Code commands
+- **`skillsRepoPath`** (string, optional): Path within the repository where skills are located (default: `skills`)
+- **`commandsRepoPath`** (string, optional): Path within the repository where commands are located (default: `commands`)
 
 ### Benefits
 - ✅ Skip store URL input on every command
