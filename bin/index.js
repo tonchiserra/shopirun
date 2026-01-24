@@ -7,6 +7,12 @@ import { config } from "../lib/config.js"
 import { syncSkills } from "../lib/handlers/syncSkills.js"
 import { syncCommands } from "../lib/handlers/syncCommands.js"
 
+// Handle Ctrl+C gracefully
+process.on('SIGINT', () => {
+    console.log('\n\n👋 Goodbye!\n')
+    process.exit(0)
+})
+
 // Custom handlers for non-Shopify CLI commands
 const customHandlers = {
     "sync-skills": syncSkills,
@@ -133,4 +139,12 @@ const init = async () => {
     await run(command)
 }
 
-init()
+init().catch((error) => {
+    // Handle ExitPromptError when user presses Ctrl+C during prompts
+    if (error.name === 'ExitPromptError') {
+        console.log('\n\n👋 Goodbye!\n')
+        process.exit(0)
+    }
+    console.error(`\n❌ Error: ${error.message}\n`)
+    process.exit(1)
+})
