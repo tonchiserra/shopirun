@@ -5,10 +5,12 @@ import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
 import { capitalize, closeTerminal, getThemeFlag, log, getVersion } from "../lib/utils.js"
 import { config } from "../lib/config.js"
 import { syncSkills } from "../lib/handlers/syncSkills.js"
+import { syncCommands } from "../lib/handlers/syncCommands.js"
 
 // Custom handlers for non-Shopify CLI commands
 const customHandlers = {
-    "sync-skills": syncSkills
+    "sync-skills": syncSkills,
+    "sync-commands": syncCommands
 }
 
 const run = async (command) => {
