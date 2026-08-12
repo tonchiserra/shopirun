@@ -69,6 +69,18 @@ npm publish
 - Theme selection uses `--theme=<id>` or `--theme=<name>` flags
 - Dev command includes `--live-reload=hot-reload --theme-editor-sync --open`
 
+### Custom Handlers
+- Commands that don't map to a single Shopify CLI invocation are registered as `null` in `lib/scripts.js` (so they still appear in the menu and pass the `argCommand in scripts` check) plus a function in the `customHandlers` map in `bin/index.js`
+- Custom handlers early-return before store/theme resolution, so they must call `getStoreFlag()` themselves if they need the store
+- `closeTerminal(code, customMessage, clear)` clears the screen by default, which wipes child-process output; pass `clear = false` when the previous output matters (e.g. the Shopify push preview URL)
+
+### Deploy Staging
+- `deploy-staging` is a custom handler (`lib/handlers/deployStaging.js`) — it needs conditional prompts, N git commands and only then a push
+- Resolves the theme by case-insensitive match on the `staging` key of `config.themes`; returns an empty theme flag when absent so the Shopify CLI prompts with its own theme list
+- Reuses the `deploy-all` / `deploy-without-jsons` factories from `lib/scripts.js` for the push instead of duplicating Shopify flags
+- Git and `gh` calls go through a local `exec()` on `cross-spawn`'s `sync` with `shell: false`, so branch names are never interpolated into a shell string
+- PR mode requires the `gh` CLI, an authenticated session and a clean working tree; it aborts on merge conflicts without deploying
+
 ### Backup System
 - Backup commands use `shopify theme duplicate --force --name="[Backup DD/MM] | Shopirun"`
 - Date format uses Spanish locale ('es-ES') for DD/MM format

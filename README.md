@@ -46,11 +46,32 @@ Commands with `make-backup-and-` prefix automatically create a timestamped backu
 - **`pull-all`** – Pull all theme files from the store
 - **`pull-jsons`** – Pull only JSON files (templates, config, locales) without deleting existing files
 - **`make-backup-and-deploy-all`** – Create a timestamped backup and deploy all theme files
+- **`deploy-staging`** – Deploy to the staging theme, optionally merging every open PR labeled `staging`
 - **`deploy-all`** – Deploy all theme files to the selected theme
 - **`make-backup-and-deploy-without-jsons`** – Create backup and deploy excluding JSON files
 - **`deploy-without-jsons`** – Deploy theme files excluding JSON configuration files
 - **`sync-skills`** – Sync Claude Code skills from a shared GitHub repository
 - **`sync-commands`** – Sync Claude Code commands from a shared GitHub repository
+
+### Deploy Staging
+Deploys to your staging theme without asking you to pick a theme every time, and can build a combined preview of everything currently under review.
+
+```bash
+shopirun deploy-staging
+```
+
+The staging theme is resolved from the `staging` key in `shopirun.config.json` (matched case-insensitively, so `staging`, `Staging` and `STAGING` all work). If there is no such key — or no config file at all — the Shopify CLI shows its own theme list instead.
+
+You are then asked two questions:
+
+1. **What to deploy** – the current working tree, or all open PRs labeled `staging`
+2. **Which files** – everything, or everything except the JSONs
+
+Choosing the PRs option creates a local integration branch named `staging-deploy-DD-MM` from the repository default branch and merges the head branch of every open PR labeled `staging` into it, then deploys the result. When it finishes you are returned to the branch you started on, and the integration branch is kept locally so you can inspect what was deployed. It is never pushed to origin.
+
+The command stops without deploying anything if the working tree has uncommitted changes, if no PRs carry the label, or if any merge conflicts — in that last case it reports the PR and the conflicting files so you can resolve them on the integration branch. PRs from forks are skipped with a warning. No theme backup is created, since staging is meant to be disposable.
+
+> Avoid pressing `Ctrl+C` while the merges are running: the CLI exits immediately and may leave you on the integration branch. `git checkout <your-branch>` gets you back.
 
 ### Claude Code Sync Commands
 Sync skills and commands for Claude Code from a shared GitHub repository. Perfect for teams that want to keep their Claude Code tools synchronized.
@@ -110,6 +131,7 @@ If no configuration file is found, the CLI will prompt for required information 
 - Node.js >= 14
 - Shopify CLI v3.x (automatically installed via `@shopify/cli` dependency)
 - Access to a Shopify store and theme development permissions
+- [GitHub CLI](https://cli.github.com) (`gh`), authenticated with `gh auth login` – only needed to deploy the staging PRs with `deploy-staging`
 
 ## How It Works
 Shopirun is a wrapper around the official Shopify CLI that provides:

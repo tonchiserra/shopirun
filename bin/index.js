@@ -2,10 +2,10 @@
 import inquirer from "inquirer"
 import { spawn } from "cross-spawn"
 import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
-import { capitalize, closeTerminal, getThemeFlag, log, getVersion } from "../lib/utils.js"
-import { config } from "../lib/config.js"
+import { capitalize, closeTerminal, getStoreFlag, getThemeFlag, log, getVersion } from "../lib/utils.js"
 import { syncSkills } from "../lib/handlers/syncSkills.js"
 import { syncCommands } from "../lib/handlers/syncCommands.js"
+import { deployStaging } from "../lib/handlers/deployStaging.js"
 
 // Handle Ctrl+C gracefully
 process.on('SIGINT', () => {
@@ -15,6 +15,7 @@ process.on('SIGINT', () => {
 
 // Custom handlers for non-Shopify CLI commands
 const customHandlers = {
+    "deploy-staging": deployStaging,
     "sync-skills": syncSkills,
     "sync-commands": syncCommands
 }
@@ -34,17 +35,7 @@ const run = async (command) => {
 
     const params = []
 
-    let store = ''
-    if(!!config.store) store = config.store
-    else {
-        let res = await inquirer.prompt([
-            { type: "input", name: "store", message: "Enter the store URL:", default: "your-store.myshopify.com" }
-        ])
-        store = res.store
-    }
-
-    params.push(`--store=${store.replace('.myshopify.com', '')}.myshopify.com`)
-    log(`🛍️  Running on store: ${store}`)
+    params.push(await getStoreFlag())
 
     if(command === "start") {
         let themeFlag = await getThemeFlag()
