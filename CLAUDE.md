@@ -67,7 +67,7 @@ npm publish
 - All commands use `npx shopify theme <subcommand>` under the hood
 - Store parameter always formatted as `--store=<name>.myshopify.com`
 - Theme selection uses `--theme=<id>` or `--theme=<name>` flags
-- Dev command includes `--live-reload=hot-reload --theme-editor-sync --open`
+- Dev command includes `--live-reload=hot-reload --theme-editor-sync --open`; `"themeEditorSync": false` in the config drops `--theme-editor-sync` (resolved once in `lib/scripts.js`)
 
 ### Custom Handlers
 - Commands that don't map to a single Shopify CLI invocation are registered as `null` in `lib/scripts.js` (so they still appear in the menu and pass the `argCommand in scripts` check) plus a function in the `customHandlers` map in `bin/index.js`

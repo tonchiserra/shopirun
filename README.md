@@ -42,7 +42,7 @@ shopirun make-backup-and-deploy-all
 Commands with `make-backup-and-` prefix automatically create a timestamped backup of the selected theme before making changes. Backup themes are named with the format: `[Backup DD/MM] | Shopirun`
 
 ### Principal Commands
-- **`start`** – Start local development server with hot-reload and theme editor sync
+- **`start`** – Start local development server with hot-reload and theme editor sync (turn the sync off with `"themeEditorSync": false`)
 - **`pull-all`** – Pull all theme files from the store
 - **`pull-jsons`** – Pull only JSON files (templates, config, locales) without deleting existing files
 - **`make-backup-and-deploy-all`** – Create a timestamped backup and deploy all theme files
@@ -118,6 +118,7 @@ Create a `shopirun.config.json` file in your project root to streamline your wor
 - **`commandsRepoUrl`** (string, optional): Custom GitHub repository URL for Claude Code commands
 - **`skillsRepoPath`** (string, optional): Path within the repository where skills are located (default: `skills`)
 - **`commandsRepoPath`** (string, optional): Path within the repository where commands are located (default: `commands`)
+- **`themeEditorSync`** (boolean, optional): Set to `false` to run `start` without `--theme-editor-sync` (default: `true`). Local files then always win and nothing is pulled back from the theme editor, which avoids the reconciliation prompt when Shopify CLI reports JSON files as different even though they are identical
 
 ### Benefits
 - ✅ Skip store URL input on every command
