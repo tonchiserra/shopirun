@@ -68,6 +68,7 @@ npm publish
 - Store parameter always formatted as `--store=<name>.myshopify.com`
 - Theme selection uses `--theme=<id>` or `--theme=<name>` flags
 - Dev command includes `--live-reload=hot-reload --theme-editor-sync --open`; `"themeEditorSync": false` in the config drops `--theme-editor-sync` (resolved once in `lib/scripts.js`)
+- `start` always passes `--port=<n>` from `getPortFlag()`: the first port from 9292 free on both `127.0.0.1` and `localhost`. Shopify CLI's own fallback checks only `localhost` (`::1` on macOS) while binding `127.0.0.1`, so it misses a second `theme dev` already on 9292
 
 ### Custom Handlers
 - Commands that don't map to a single Shopify CLI invocation are registered as `null` in `lib/scripts.js` (so they still appear in the menu and pass the `argCommand in scripts` check) plus a function in the `customHandlers` map in `bin/index.js`

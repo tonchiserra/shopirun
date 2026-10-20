@@ -2,7 +2,7 @@
 import inquirer from "inquirer"
 import { spawn } from "cross-spawn"
 import { scripts, principalScripts, secondaryScripts } from "../lib/scripts.js"
-import { capitalize, closeTerminal, getStoreFlag, getThemeFlag, log, getVersion } from "../lib/utils.js"
+import { capitalize, closeTerminal, getStoreFlag, getThemeFlag, getPortFlag, log, getVersion } from "../lib/utils.js"
 import { syncSkills } from "../lib/handlers/syncSkills.js"
 import { syncCommands } from "../lib/handlers/syncCommands.js"
 import { deployStaging } from "../lib/handlers/deployStaging.js"
@@ -40,6 +40,7 @@ const run = async (command) => {
     if(command === "start") {
         let themeFlag = await getThemeFlag()
         params.push(themeFlag)
+        params.push(await getPortFlag())
     }
 
     if(command.includes('make-backup-and-deploy')) {

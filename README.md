@@ -42,7 +42,7 @@ shopirun make-backup-and-deploy-all
 Commands with `make-backup-and-` prefix automatically create a timestamped backup of the selected theme before making changes. Backup themes are named with the format: `[Backup DD/MM] | Shopirun`
 
 ### Principal Commands
-- **`start`** – Start local development server with hot-reload and theme editor sync (turn the sync off with `"themeEditorSync": false`)
+- **`start`** – Start local development server with hot-reload and theme editor sync (turn the sync off with `"themeEditorSync": false`). Uses the first free port from `9292` up, so you can run several stores at once
 - **`pull-all`** – Pull all theme files from the store
 - **`pull-jsons`** – Pull only JSON files (templates, config, locales) without deleting existing files
 - **`make-backup-and-deploy-all`** – Create a timestamped backup and deploy all theme files
